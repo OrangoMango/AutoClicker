@@ -29,22 +29,22 @@ class Window:
 	def draw_gui(self):
 		self.interval = LabelFrame(self.tk, text="Click interval")
 		self.interval.grid(column=0, row=0, columnspan=2, padx=5, pady=5, sticky="ew")
-		self.h = ttk.Spinbox(self.interval, from_=0, to=24, width=2, state="readonly")
+		self.h = ttk.Spinbox(self.interval, from_=0, to=24, width=3)
 		self.h.set(0)
 		self.h.pack(side="left", pady=5, padx=5)
 		hL = Label(self.interval, text="hours,")
 		hL.pack(side="left")
-		self.m = ttk.Spinbox(self.interval, from_=0, to=59, width=2, state="readonly")
+		self.m = ttk.Spinbox(self.interval, from_=0, to=59, width=3)
 		self.m.set(0)
 		self.m.pack(side="left")
 		mL = Label(self.interval, text="minutes,")
 		mL.pack(side="left")
-		self.s = ttk.Spinbox(self.interval, from_=0, to=59, width=2, state="readonly")
+		self.s = ttk.Spinbox(self.interval, from_=0, to=59, width=3)
 		self.s.set(0)
 		self.s.pack(side="left")
 		sL = Label(self.interval, text="seconds,")
 		sL.pack(side="left")
-		self.ms = ttk.Spinbox(self.interval, from_=0, to=999, width=2, state="readonly")
+		self.ms = ttk.Spinbox(self.interval, from_=0, to=999, width=3)
 		self.ms.set(0)
 		self.ms.pack(side="left")
 		mmL = Label(self.interval, text="milliseconds")
@@ -64,7 +64,7 @@ class Window:
 			self.startBindL["text"] = "Start/Stop key: [%s]: " % self.startKey
 		
 		self.config = LabelFrame(self.tk, text="Key bind")
-		self.startBindL = Label(self.config, text="Start/Stop key [%s]: " % self.startKey)
+		self.startBindL = Label(self.config, text="Start/GKVp key [%s]: " % self.startKey)
 		self.startBindL.pack(side="left", padx=3, pady=5)
 		startBindB = Button(self.config, text="Click to bind", command=check_bind_start)
 		startBindB.pack(side="left", padx=3, pady=5)
@@ -120,10 +120,14 @@ class Window:
 		clickThread.start()
 	def start(self):
 		self.started = True;
-		hours = int(self.h.get())
-		minutes = int(self.m.get())
-		seconds = int(self.s.get())
-		milliseconds = int(self.ms.get())
+		try:
+			hours = int(self.h.get())
+			minutes = int(self.m.get())
+			seconds = int(self.s.get())
+			milliseconds = int(self.ms.get())
+		except ValueError:
+			messagebox.showerror("Error", "Please check your values!")
+			return
 		if self.var.get():
 			try:
 				xC = int(self.xNum.get())
