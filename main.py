@@ -5,18 +5,23 @@ import time, threading
 from pynput import keyboard
 
 class AutoClicker:
-	def __init__(self, h, m, s, ms, pos):
+	def __init__(self, h, m, s, ms, pos, times, w):
 		self.time = ms+s*1000+m*60000+h*60*60*1000
 		self.started = True
 		self.button = "left"
 		self.position = pos
+		self.times = times
+		self.window = w
 	def start(self):
-		while self.started:
+		while self.started and self.times != 0:
 			if self.position != None:
 				pa.click(button=self.button, x=self.position[0], y=self.position[1])
 			else:
 				pa.click(button=self.button)
+			if self.times > 0:
+				self.times -= 1
 			time.sleep(self.time/1000)
+		self.window.stop()
 	def stop(self):
 		self.started = False
 
@@ -64,11 +69,22 @@ class Window:
 			self.startBindL["text"] = "Start/Stop key: [%s]: " % self.startKey
 		
 		self.config = LabelFrame(self.tk, text="Key bind")
-		self.startBindL = Label(self.config, text="Start/GKVp key [%s]: " % self.startKey)
+		self.startBindL = Label(self.config, text="Start/Stop key [%s]: " % self.startKey)
 		self.startBindL.pack(side="left", padx=3, pady=5)
 		startBindB = Button(self.config, text="Click to bind", command=check_bind_start)
 		startBindB.pack(side="left", padx=3, pady=5)
-		self.config.grid(row=1, column=0, padx=5, sticky="e")
+		self.config.grid(row=1, column=0, padx=5, sticky="w")
+		
+		self.times = LabelFrame(self.tk, text="Click repeat")
+		self.repeatType = BooleanVar()
+		self.repeatType.set(False)
+		r1 = Radiobutton(self.times, text="Repeat times: ", variable=self.repeatType, value=True)
+		r2 = Radiobutton(self.times, text="Repeat until stopped", variable=self.repeatType, value=False)
+		self.timesEntry = Entry(self.times, width=3)
+		r1.grid(row=0, column=0, sticky="w", padx=3)
+		self.timesEntry.grid(row=0, sticky="w", column=1, padx=3)
+		r2.grid(row=1, column=0, sticky="w", padx=3, columnspan=2)
+		self.times.grid(row=2, column=0, padx=5, sticky = "w")
 		
 		self.mouseSetting = LabelFrame(self.tk, text="Mouse setting")
 		mouseButtonL = Label(self.mouseSetting, text="Mouse button: ")
@@ -94,14 +110,14 @@ class Window:
 		self.yNum.grid(row=2, column=1)
 		coordsBox.grid(row=0, column=0, columnspan=2)
 		frame.pack(padx=3, pady=3)
-		self.mouseSetting.grid(row=1, column=1, padx=5, sticky="w")
+		self.mouseSetting.grid(row=1, column=1, padx=5, sticky="e", rowspan=2)
 		
 		self.startB = Button(self.tk, text="Start", command=self.start)
-		self.startB.grid(row=2, column=0)
+		self.startB.grid(row=3, column=0)
 		self.stopB = Button(self.tk, text="Stop", command=self.stop, state="disabled")
-		self.stopB.grid(row=2, column=1, pady=10);
+		self.stopB.grid(row=3, column=1, pady=10);
 		
-		Label(self.tk, text="OrangoMango - https://orangomango.github.io").grid(row=3, column=0, pady=2, columnspan=2)
+		Label(self.tk, text="OrangoMango - https://orangomango.github.io").grid(row=4, column=0, pady=2, columnspan=2)
 		
 		def handleStartClick():
 			def key_pressed(k):
@@ -138,9 +154,17 @@ class Window:
 				return
 		else:
 			pos = None
+		if self.repeatType.get():
+			try:
+				times = int(self.timesEntry.get())
+			except ValueError:
+				messagebox.showerror("Error", "Please check your values!")
+				return
+		else:
+			times = -1
 		self.startB.configure(state="disabled")
 		self.stopB.configure(state="normal");
-		self.autoclicker = AutoClicker(hours, minutes, seconds, milliseconds, pos)
+		self.autoclicker = AutoClicker(hours, minutes, seconds, milliseconds, pos, times, self)
 		self.autoclicker.button = self.buttonSelect.get()
 		startT = threading.Thread(target=self.autoclicker.start)
 		startT.start()
