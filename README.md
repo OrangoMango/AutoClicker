@@ -14,3 +14,6 @@ pip3 install pyautogui pynput
 ```
 python3 main.py
 ```
+
+## Screenshot
+![autoclicker](https://user-images.githubusercontent.com/61402409/149806860-f1319ac7-e788-43e0-ba44-33bc8ecb0c87.png)
